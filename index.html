@@ -1,12 +1,224 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Goodwall</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Random Fun Facts</title>
+    <style>
+        :root{--bg:#0f172a;--card:#0b1220;--accent:#60a5fa;--muted:#94a3b8}
+        html,body{height:100%}
+        body{margin:0;font-family:Inter,system-ui,Segoe UI,Arial;background:linear-gradient(180deg,#071025 0%,#081226 100%);color:#e6eef8;display:flex;align-items:center;justify-content:center}
+        .card{width:min(760px,94vw);background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.04);padding:32px;border-radius:12px;box-shadow:0 10px 30px rgba(2,6,23,0.6);backdrop-filter:blur(6px)}
+        h1{margin:0 0 8px;font-size:1.6rem;color:var(--accent)}
+        p.lead{margin:0 0 18px;color:var(--muted)}
+        .fact{font-size:1.25rem;line-height:1.4;margin:18px 0;padding:18px;border-radius:10px;background:linear-gradient(90deg,rgba(96,165,250,0.06),rgba(96,165,250,0.02));border:1px solid rgba(96,165,250,0.06)}
+        .controls{display:flex;gap:10px;flex-wrap:wrap}
+        button{background:var(--accent);color:#042135;border:0;padding:10px 14px;border-radius:10px;font-weight:600;cursor:pointer}
+        button.secondary{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)}
+        footer{margin-top:14px;color:var(--muted);font-size:0.9rem;display:flex;justify-content:space-between;align-items:center}
+        .small{font-size:0.9rem;color:var(--muted)}
+        @media (max-width:520px){.card{padding:20px}.fact{font-size:1rem}}
+    </style>
 </head>
 <body>
-    <h>Hello Goodwall Team</h>
-    <p> I am writing to express my interest in joining the Goodwall team. I am passionate about contributing to a platform that empowers individuals and fosters professional growth. With my skills and experience, I believe I can make a meaningful impact on your mission.</p>
+    <main class="card" role="main">
+        <h1>Random Fun Facts</h1>
+        <p class="lead">Click the button to reveal a random fun fact. Refresh the page to shuffle the list.</p>
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:6px">
+            <div style="flex:1;min-width:220px">
+                <strong>Daily fact:</strong>
+                <div id="daily" class="fact" style="margin-top:8px">Loading daily fact…</div>
+            </div>
+            <div style="flex-basis:280px;display:flex;gap:8px;align-items:center;justify-content:flex-end;flex-wrap:wrap">
+                <button id="newFact">New fact</button>
+                <button id="narrate" class="secondary">Narrate</button>
+                <button id="fav" class="secondary">Favorite</button>
+                <button id="viewFavs" class="secondary">View favorites</button>
+                <button id="copy" class="secondary">Copy</button>
+                <button id="tweet" class="secondary">Share</button>
+                <button id="exportCard" class="secondary">Export card</button>
+                <button id="openGame" class="secondary">Play game</button>
+            </div>
+        </div>
+
+        <div id="fact" class="fact" aria-live="polite" style="margin-top:12px">Press "New fact" to get started!</div>
+
+        <footer>
+            <div class="small" id="counter">0 of 0 shown</div>
+            <div class="small">Made with a sprinkle of randomness ✨</div>
+        </footer>
+
+        <!-- Favorites modal -->
+        <div id="favsModal" style="display:none;position:fixed;inset:0;background:rgba(2,6,23,0.6);align-items:center;justify-content:center">
+            <div style="background:var(--card);padding:18px;border-radius:10px;max-width:720px;width:94%;margin:auto;color:inherit">
+                <h2 style="margin-top:0">Your favorites</h2>
+                <div id="favsList" style="max-height:40vh;overflow:auto"></div>
+                <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+                    <button id="copyFavs" class="secondary">Copy list</button>
+                    <button id="closeFavs">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game modal -->
+        <div id="gameModal" style="display:none;position:fixed;inset:0;background:rgba(2,6,23,0.6);align-items:center;justify-content:center">
+            <div style="background:var(--card);padding:16px;border-radius:10px;max-width:760px;width:96%;margin:auto;color:inherit">
+                <h2 style="margin:0 0 8px">Memory Match</h2>
+                <p style="margin:0 0 12px;color:var(--muted)">Match identical facts. Good luck!</p>
+                <div id="gameBoard" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px"></div>
+                <div style="display:flex;justify-content:flex-end;margin-top:12px">
+                    <button id="restartGame" class="secondary">Restart</button>
+                    <button id="closeGame">Close</button>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script>
+        (function(){
+            try{
+                console.log('Random Fun Facts init');
+            const facts = [
+                "Honey never spoils — archaeologists have found edible honey in ancient Egyptian tombs.",
+                "Octopuses have three hearts and blue blood.",
+                "Bananas are berries, but strawberries are not.",
+                "There are more possible iterations of a game of chess than atoms in the observable universe.",
+                "A day on Venus is longer than its year.",
+                "Wombat poop is cube-shaped.",
+                "Humans share about 60% of their DNA with bananas.",
+                "Some turtles can breathe through their butts (cloacal respiration).",
+                "Cleopatra lived closer in time to the Moon landing than to the building of the Great Pyramid.",
+                "Oxford University is older than the Aztec Empire.",
+                "A bolt of lightning contains enough energy to toast many slices of bread.",
+                "The shortest war in history lasted around 38–45 minutes (Anglo–Zanzibar War).",
+                "Sea otters hold hands while sleeping to avoid drifting apart.",
+                "A day on Mercury lasts about 59 Earth days.",
+                "Under certain conditions, hot water can freeze faster than cold water (Mpemba effect).",
+                "Sharks existed before trees did.",
+                "A single strand of spaghetti is called a spaghetto.",
+                "There are more stars in the observable universe than grains of sand on Earth.",
+                "The inventor of the Pringles can is buried in one.",
+                "Scotland's national animal is the unicorn.",
+                "A 'jiffy' is an informal unit of time — sometimes defined as 1/100th of a second.",
+                "Pineapples can take about two years to grow.",
+                "The longest common English word without a traditional vowel is 'rhythms'.",
+                "Vending machines are responsible for more accidental deaths than shark attacks.",
+                "The mantis shrimp can see polarized light and has around 16 color receptors.",
+                "Butterflies taste with their feet.",
+                "A group of crows is called a murder.",
+                "Sloths can hold their breath for up to 40 minutes by slowing their heart rate.",
+                "A large portion of household dust is made up of dead skin cells.",
+                "Alaska has the longest coastline of any U.S. state.",
+                "The first recorded computer 'bug' was an actual moth trapped in a relay.",
+                "The heart of a blue whale is about the size of a small car.",
+                "Sound travels roughly four times faster in water than in air.",
+                "Peanuts are legumes, not true nuts.",
+                "There is a species of jellyfish, Turritopsis dohrnii, that can revert to an earlier life stage and is considered biologically immortal.",
+                "The world's smallest reptile discovered in 2021 is smaller than a grain of rice.",
+                "The Moon experiences quakes known as moonquakes.",
+                "The abbreviation 'OK' likely comes from a 19th-century joke abbreviation 'oll korrect'.",
+                "A teaspoon of healthy soil can contain more living organisms than there are people on Earth.",
+                "The only letter not used in any U.S. state name is 'Q'."
+            ];
+
+            let shown = new Set();
+            const factEl = document.getElementById('fact');
+            const counterEl = document.getElementById('counter');
+            const dailyEl = document.getElementById('daily');
+
+            function updateCounter(){
+                counterEl.textContent = `${shown.size} of ${facts.length} shown`;
+            }
+
+            function randomFact(){
+                if(shown.size === facts.length){ shown.clear(); }
+                let idx; do { idx = Math.floor(Math.random()*facts.length); } while(shown.has(idx));
+                shown.add(idx); return {text: facts[idx], idx};
+            }
+
+            function showFact(f){ factEl.textContent = f.text; factEl.dataset.idx = f.idx; updateCounter(); const favBtn=document.getElementById('fav'); if(favBtn){ favBtn.textContent = getFavs().includes(f.idx)?'Favorited ✓':'Favorite'; } }
+
+            // New fact button
+            const newBtn = document.getElementById('newFact');
+            if(newBtn){ newBtn.addEventListener('click', ()=>{ try{ const f = randomFact(); showFact(f); }catch(e){ console.error('New fact failed', e); alert('Could not get a new fact'); } }); }
+
+            // Daily fact (deterministic by date)
+            function dailyIndex(){
+                const d = new Date().toISOString().slice(0,10); // YYYY-MM-DD
+                let s = 0; for(let i=0;i<d.length;i++) s += d.charCodeAt(i);
+                return s % facts.length;
+            }
+            const dIdx = dailyIndex(); dailyEl.textContent = facts[dIdx];
+
+            // Favorites
+            function getFavs(){ try { return JSON.parse(localStorage.getItem('rf_favs')||'[]'); } catch(e){ return []; } }
+            function saveFavs(a){ localStorage.setItem('rf_favs', JSON.stringify(a)); }
+
+            function toggleFav(idx){ const a=getFavs(); const i=a.indexOf(idx); if(i>-1){ a.splice(i,1); } else { a.push(idx); } saveFavs(a); }
+            function renderFavs(){ const list=document.getElementById('favsList'); const a=getFavs(); if(!a.length){ list.innerHTML='<p class="small">No favorites yet.</p>'; return } list.innerHTML=''; a.forEach(i=>{ const d=document.createElement('div'); d.style.padding='8px 0'; d.textContent = facts[i]; list.appendChild(d); }); }
+
+            document.getElementById('viewFavs').addEventListener('click', ()=>{ renderFavs(); const m=document.getElementById('favsModal'); m.style.display='flex'; });
+            document.getElementById('closeFavs').addEventListener('click', ()=>{ document.getElementById('favsModal').style.display='none'; });
+            document.getElementById('copyFavs').addEventListener('click', ()=>{ try{ const a=getFavs().map(i=>facts[i]).join('\n\n'); navigator.clipboard.writeText(a); const btn=document.getElementById('copyFavs'); const prev=btn.textContent; btn.textContent='Copied!'; setTimeout(()=>btn.textContent=prev,1200); }catch(e){ console.error(e); alert('Copy failed: '+(e&&e.message)); } });
+
+            document.getElementById('fav').addEventListener('click', ()=>{ const idx = Number(factEl.dataset.idx); if(!Number.isFinite(idx)) return; toggleFav(idx); const txt = getFavs().includes(idx)?'Favorited ✓':'Favorite'; document.getElementById('fav').textContent = txt; });
+
+            // Narration
+            function narrate(text){ if(!('speechSynthesis' in window)){ alert('Speech not supported'); return } const u=new SpeechSynthesisUtterance(text); u.lang='en-US'; speechSynthesis.cancel(); speechSynthesis.speak(u); }
+            document.getElementById('narrate').addEventListener('click', ()=>{ try{ narrate(factEl.textContent); }catch(e){ console.error(e); alert('Narration failed'); } });
+
+            // Copy/share/export
+            document.getElementById('copy').addEventListener('click', async ()=>{ try{ await navigator.clipboard.writeText(factEl.textContent); const btn=document.getElementById('copy'); const prev=btn.textContent; btn.textContent='Copied!'; setTimeout(()=>btn.textContent=prev,1200); }catch(e){ console.error(e); alert('Copy failed: '+(e&&e.message)); } });
+            document.getElementById('tweet').addEventListener('click', ()=>{ const url=encodeURIComponent(location.href); const text=encodeURIComponent(factEl.textContent+' — via Random Fun Facts'); window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank'); });
+
+            // Export visual card via canvas
+            document.getElementById('exportCard').addEventListener('click', ()=>{
+                const text = factEl.textContent || dailyEl.textContent || 'Random Fact';
+                const canvas = document.createElement('canvas'); const w=1200,h=630; canvas.width=w; canvas.height=h; const ctx=canvas.getContext('2d');
+                ctx.fillStyle = '#071025'; ctx.fillRect(0,0,w,h);
+                ctx.fillStyle = '#60a5fa'; ctx.fillRect(40,40,w-80,h-80);
+                ctx.fillStyle = '#042135'; ctx.fillRect(60,60,w-120,h-120);
+                try{
+                    ctx.fillStyle = '#e6eef8'; ctx.font='36px sans-serif'; wrapText(ctx, text, 100, 160, w-200, 42);
+                    const a = document.createElement('a'); a.download='fact.png'; a.href = canvas.toDataURL('image/png'); a.click();
+                }catch(e){ console.error(e); alert('Export failed: '+(e&&e.message)); }
+            });
+
+            function wrapText(ctx, text, x, y, maxWidth, lineHeight){ const words = text.split(' '); let line=''; for(let n=0;n<words.length;n++){ const test=line + words[n] + ' '; const metrics=ctx.measureText(test); if(metrics.width>maxWidth && n>0){ ctx.fillText(line, x, y); line = words[n] + ' '; y += lineHeight; } else { line = test; } } ctx.fillText(line, x, y); }
+
+            // Mini-game (memory match)
+            const gameModal = document.getElementById('gameModal'); const gameBoard = document.getElementById('gameBoard');
+            function startGame(){
+                const pairs = Math.min(8, Math.floor(facts.length/2));
+                const sel = shuffle(Array.from({length:facts.length},(_,i)=>i)).slice(0,pairs);
+                let cards = shuffle(sel.concat(sel));
+                gameBoard.innerHTML=''; cards.forEach((idx, i)=>{
+                    const btn = document.createElement('button'); btn.className='cardBtn'; btn.style.padding='14px'; btn.style.borderRadius='8px'; btn.style.background='#071025'; btn.style.color='transparent'; btn.style.border='1px solid rgba(255,255,255,0.04)'; btn.dataset.idx = idx; btn.dataset.pos = i;
+                    btn.addEventListener('click', onCardClick);
+                    gameBoard.appendChild(btn);
+                });
+                gameModal.style.display='flex';
+                first=null; lock=false; matches=0;
+            }
+            let first=null, lock=false, matches=0;
+            function onCardClick(e){ if(lock) return; const btn=e.currentTarget; if(btn.classList.contains('matched')||btn===first) return; reveal(btn); if(!first){ first=btn; return } if(btn.dataset.idx===first.dataset.idx){ btn.classList.add('matched'); first.classList.add('matched'); matches++; first=null; if(matches===gameBoard.children.length/2){ setTimeout(()=>alert('You won!'),200); } } else { lock=true; setTimeout(()=>{ hide(btn); hide(first); first=null; lock=false; },700); } }
+            function reveal(btn){ btn.textContent = facts[Number(btn.dataset.idx)]; btn.style.color=''; }
+            function hide(btn){ btn.textContent=''; btn.style.color='transparent'; }
+            function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]] } return a }
+            document.getElementById('openGame').addEventListener('click', ()=>{ try{ startGame(); }catch(e){ console.error(e); alert('Game failed to start: '+(e&&e.message)); } });
+            document.getElementById('closeGame').addEventListener('click', ()=>gameModal.style.display='none');
+            document.getElementById('restartGame').addEventListener('click', ()=>{ try{ startGame(); }catch(e){ console.error(e); alert('Restart failed: '+(e&&e.message)); } });
+
+              // show an initial random fact
+              try{ showFact(randomFact()); }catch(e){ console.error('Initial fact failed', e); }
+
+                    }catch(err){
+                        console.error('Initialization error', err);
+                        const banner = document.createElement('div');
+                        banner.textContent = 'App error: '+(err&&err.message);
+                        banner.style.background = '#ffdddd'; banner.style.color='#660000'; banner.style.padding='8px'; banner.style.position='fixed'; banner.style.top='8px'; banner.style.left='8px'; banner.style.right='8px'; banner.style.zIndex=9999;
+                        document.body.appendChild(banner);
+                    }
+        })();
+    </script>
 </body>
 </html>
