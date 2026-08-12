@@ -3,15 +3,16 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Random Fun Facts</title>
+    <title>Fun Facts Hub</title>
+    <meta name="description" content="Discover fun facts by topic, search with smart filters, save favorites, play a mini-game, and export shareable cards.">
     <style>
         :root{--bg:#0f172a;--card:#0b1220;--accent:#60a5fa;--muted:#94a3b8}
         html,body{height:100%}
         body{margin:0;font-family:Inter,system-ui,Segoe UI,Arial;background:linear-gradient(180deg,#071025 0%,#081226 100%);color:#e6eef8;display:flex;align-items:center;justify-content:center}
-        .card{width:min(760px,94vw);background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.04);padding:32px;border-radius:12px;box-shadow:0 10px 30px rgba(2,6,23,0.6);backdrop-filter:blur(6px)}
+        .card{width:min(760px,94vw);background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.04);padding:28px;border-radius:12px;box-shadow:0 10px 30px rgba(2,6,23,0.6);backdrop-filter:blur(6px)}
         h1{margin:0 0 8px;font-size:1.6rem;color:var(--accent)}
-        p.lead{margin:0 0 18px;color:var(--muted)}
-        .fact{font-size:1.25rem;line-height:1.4;margin:18px 0;padding:18px;border-radius:10px;background:linear-gradient(90deg,rgba(96,165,250,0.06),rgba(96,165,250,0.02));border:1px solid rgba(96,165,250,0.06)}
+        p.lead{margin:0 0 14px;color:var(--muted)}
+        .fact{font-size:1.25rem;line-height:1.4;margin:12px 0;padding:16px;border-radius:10px;background:linear-gradient(90deg,rgba(96,165,250,0.06),rgba(96,165,250,0.02));border:1px solid rgba(96,165,250,0.06)}
         .controls{display:flex;gap:10px;flex-wrap:wrap}
         button{background:var(--accent);color:#042135;border:0;padding:10px 14px;border-radius:10px;font-weight:600;cursor:pointer}
         button.secondary{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)}
@@ -23,13 +24,31 @@
 <body>
     <main class="card" role="main">
         <h1>Random Fun Facts</h1>
-        <p class="lead">Click the button to reveal a random fun fact. Refresh the page to shuffle the list.</p>
-        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:6px">
+        <p class="lead">Search by topic to find facts about finance, market trends, policy, science, space, history, or animals.</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px">
+            <input id="searchInput" placeholder="Search facts by topic or keyword" style="flex:1;min-width:220px;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.04);color:#e6eef8">
+            <button id="searchButton" class="secondary">Search</button>
+        </div>
+        <div style="margin-top:16px">
+            <div class="small" style="margin-bottom:8px;color:#cbd5e1;letter-spacing:0.03em">Trending topics</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <button class="secondary topic-btn" data-topic="finance">Finance</button>
+                <button class="secondary topic-btn" data-topic="market">Market</button>
+                <button class="secondary topic-btn" data-topic="policy">Policy</button>
+                <button class="secondary topic-btn" data-topic="science">Science</button>
+                <button class="secondary topic-btn" data-topic="history">History</button>
+                <button class="secondary topic-btn" data-topic="animals">Animals</button>
+                <button class="secondary topic-btn" data-topic="space">Space</button>
+            </div>
+        </div>
+        <div id="searchResult" class="small" style="margin-top:10px;color:var(--muted)">Try searching for a topic or click a suggestion above.</div>
+        <div id="searchMatches" class="small" style="margin-top:10px;color:#e6eef8"></div>
+        <div style="display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap;margin-top:6px">
             <div style="flex:1;min-width:220px">
                 <strong>Daily fact:</strong>
-                <div id="daily" class="fact" style="margin-top:8px">Loading daily fact…</div>
+                <div id="daily" class="fact" style="margin-top:6px">Loading daily fact…</div>
             </div>
-            <div style="flex-basis:280px;display:flex;gap:8px;align-items:center;justify-content:flex-end;flex-wrap:wrap">
+            <div style="flex-basis:280px;display:flex;gap:6px;align-items:center;justify-content:flex-end;flex-wrap:wrap">
                 <button id="newFact">New fact</button>
                 <button id="narrate" class="secondary">Narrate</button>
                 <button id="fav" class="secondary">Favorite</button>
@@ -41,9 +60,9 @@
             </div>
         </div>
 
-        <div id="fact" class="fact" aria-live="polite" style="margin-top:12px">Press "New fact" to get started!</div>
+        <div id="fact" class="fact" aria-live="polite" style="margin-top:10px">Press "New fact" to get started!</div>
 
-        <footer>
+        <footer style="margin-top:10px">
             <div class="small" id="counter">0 of 0 shown</div>
             <div class="small">Made with a sprinkle of randomness ✨</div>
         </footer>
@@ -78,46 +97,49 @@
             try{
                 console.log('Random Fun Facts init');
             const facts = [
-                "Honey never spoils — archaeologists have found edible honey in ancient Egyptian tombs.",
-                "Octopuses have three hearts and blue blood.",
-                "Bananas are berries, but strawberries are not.",
-                "There are more possible iterations of a game of chess than atoms in the observable universe.",
-                "A day on Venus is longer than its year.",
-                "Wombat poop is cube-shaped.",
-                "Humans share about 60% of their DNA with bananas.",
-                "Some turtles can breathe through their butts (cloacal respiration).",
-                "Cleopatra lived closer in time to the Moon landing than to the building of the Great Pyramid.",
-                "Oxford University is older than the Aztec Empire.",
-                "A bolt of lightning contains enough energy to toast many slices of bread.",
-                "The shortest war in history lasted around 38–45 minutes (Anglo–Zanzibar War).",
-                "Sea otters hold hands while sleeping to avoid drifting apart.",
-                "A day on Mercury lasts about 59 Earth days.",
-                "Under certain conditions, hot water can freeze faster than cold water (Mpemba effect).",
-                "Sharks existed before trees did.",
-                "A single strand of spaghetti is called a spaghetto.",
-                "There are more stars in the observable universe than grains of sand on Earth.",
-                "The inventor of the Pringles can is buried in one.",
-                "Scotland's national animal is the unicorn.",
-                "A 'jiffy' is an informal unit of time — sometimes defined as 1/100th of a second.",
-                "Pineapples can take about two years to grow.",
-                "The longest common English word without a traditional vowel is 'rhythms'.",
-                "Vending machines are responsible for more accidental deaths than shark attacks.",
-                "The mantis shrimp can see polarized light and has around 16 color receptors.",
-                "Butterflies taste with their feet.",
-                "A group of crows is called a murder.",
-                "Sloths can hold their breath for up to 40 minutes by slowing their heart rate.",
-                "A large portion of household dust is made up of dead skin cells.",
-                "Alaska has the longest coastline of any U.S. state.",
-                "The first recorded computer 'bug' was an actual moth trapped in a relay.",
-                "The heart of a blue whale is about the size of a small car.",
-                "Sound travels roughly four times faster in water than in air.",
-                "Peanuts are legumes, not true nuts.",
-                "There is a species of jellyfish, Turritopsis dohrnii, that can revert to an earlier life stage and is considered biologically immortal.",
-                "The world's smallest reptile discovered in 2021 is smaller than a grain of rice.",
-                "The Moon experiences quakes known as moonquakes.",
-                "The abbreviation 'OK' likely comes from a 19th-century joke abbreviation 'oll korrect'.",
-                "A teaspoon of healthy soil can contain more living organisms than there are people on Earth.",
-                "The only letter not used in any U.S. state name is 'Q'."
+                {text:"The global stock market is older than most modern nations; the first stock exchange opened in Amsterdam in 1602.", topics:["finance","market","history"]},
+                {text:"A central bank uses interest rate policy to control inflation and support employment.", topics:["finance","policy"]},
+                {text:"A bear market is usually defined as a drop of at least 20% from recent highs.", topics:["finance","market"]},
+                {text:"In many countries, a new financial policy can reshape borrowing costs and consumer savings.", topics:["finance","policy"]},
+                {text:"Diversification spreads investment risk by holding stocks, bonds, and assets in different sectors.", topics:["finance","market"]},
+                {text:"A credit score is used by banks to decide loan rates and mortgage approvals.", topics:["finance"]},
+                {text:"IPO stands for initial public offering, when a company sells shares to the public for the first time.", topics:["finance","market"]},
+                {text:"Cryptocurrency markets trade 24/7, unlike traditional stock exchanges with set opening hours.", topics:["finance","market","crypto"]},
+                {text:"A fiscal policy change can mean new government spending, tax cuts, or budget targets.", topics:["finance","policy"]},
+                {text:"Green bonds finance environmentally friendly projects and are growing fast around the world.", topics:["finance","policy"]},
+                {text:"A day on Venus is longer than its year.", topics:["space","science"]},
+                {text:"A teaspoon of healthy soil can contain more living organisms than there are people on Earth.", topics:["science","nature"]},
+                {text:"The Moon experiences quakes called moonquakes.", topics:["space","science"]},
+                {text:"A group of crows is called a murder.", topics:["animals","culture"]},
+                {text:"Butterflies taste with their feet.", topics:["animals","nature"]},
+                {text:"The mantis shrimp can see polarized light and has around 16 color receptors.", topics:["animals","science"]},
+                {text:"Sharks existed before trees did.", topics:["science","animals"]},
+                {text:"Octopuses have three hearts and blue blood.", topics:["animals","science"]},
+                {text:"Sea otters hold hands while sleeping to avoid drifting apart.", topics:["animals","nature"]},
+                {text:"A bolt of lightning contains enough energy to toast many slices of bread.", topics:["science","nature"]},
+                {text:"The world’s fastest land animal is the cheetah, reaching speeds over 60 mph.", topics:["animals","science"]},
+                {text:"There are more stars in the observable universe than grains of sand on Earth.", topics:["space","science"]},
+                {text:"A single strand of spaghetti is called a spaghetto.", topics:["food","culture"]},
+                {text:"Bananas are berries, but strawberries are not.", topics:["food","science"]},
+                {text:"Peanuts are legumes, not true nuts.", topics:["food","science"]},
+                {text:"Pineapples can take about two years to grow.", topics:["food","nature"]},
+                {text:"Honey never spoils — archaeologists have found edible honey in ancient Egyptian tombs.", topics:["food","history"]},
+                {text:"Cleopatra lived closer in time to the Moon landing than to the building of the Great Pyramid.", topics:["history"]},
+                {text:"Oxford University is older than the Aztec Empire.", topics:["history"]},
+                {text:"The first recorded computer 'bug' was an actual moth trapped in a relay.", topics:["tech","history"]},
+                {text:"The abbreviation 'OK' likely comes from a 19th-century joke abbreviation 'oll korrect'.", topics:["language","history"]},
+                {text:"Scotland's national animal is the unicorn.", topics:["culture","history"]},
+                {text:"A 'jiffy' is an informal unit of time — sometimes defined as 1/100th of a second.", topics:["science","culture"]},
+                {text:"The world's smallest reptile discovered in 2021 is smaller than a grain of rice.", topics:["animals","science"]},
+                {text:"The longest common English word without a traditional vowel is 'rhythms'.", topics:["language","culture"]},
+                {text:"Wombat poop is cube-shaped.", topics:["animals","nature"]},
+                {text:"The heart of a blue whale is about the size of a small car.", topics:["animals","science"]},
+                {text:"Sound travels roughly four times faster in water than in air.", topics:["science","nature"]},
+                {text:"The shortest war in history lasted around 38–45 minutes (Anglo–Zanzibar War).", topics:["history"]},
+                {text:"The mantis shrimp can see polarized light and has around 16 color receptors.", topics:["animals","science"]},
+                {text:"Humans share about 60% of their DNA with bananas.", topics:["science","food"]},
+                {text:"A day on Mercury lasts about 59 Earth days.", topics:["space","science"]},
+                {text:"A teaspoon of healthy soil can contain more living organisms than there are people on Earth.", topics:["nature","science"]}
             ];
 
             let shown = new Set();
@@ -132,7 +154,7 @@
             function randomFact(){
                 if(shown.size === facts.length){ shown.clear(); }
                 let idx; do { idx = Math.floor(Math.random()*facts.length); } while(shown.has(idx));
-                shown.add(idx); return {text: facts[idx], idx};
+                shown.add(idx); return {text: facts[idx].text, idx};
             }
 
             function showFact(f){ factEl.textContent = f.text; factEl.dataset.idx = f.idx; updateCounter(); const favBtn=document.getElementById('fav'); if(favBtn){ favBtn.textContent = getFavs().includes(f.idx)?'Favorited ✓':'Favorite'; } }
@@ -141,20 +163,55 @@
             const newBtn = document.getElementById('newFact');
             if(newBtn){ newBtn.addEventListener('click', ()=>{ try{ const f = randomFact(); showFact(f); }catch(e){ console.error('New fact failed', e); alert('Could not get a new fact'); } }); }
 
+            // Topic search and AI-style filters
+            const searchInput = document.getElementById('searchInput');
+            const searchButton = document.getElementById('searchButton');
+            const searchResult = document.getElementById('searchResult');
+            const topicButtons = Array.from(document.querySelectorAll('.topic-btn'));
+
+            function findFacts(query){
+                const normalized = query.trim().toLowerCase();
+                if(!normalized) return [];
+                return facts
+                    .map((fact, idx)=>({ ...fact, idx }))
+                    .filter(item => item.text.toLowerCase().includes(normalized)
+                        || item.topics.some(topic => topic.includes(normalized)));
+            }
+
+            function showSearchResult(query){
+                const matches = findFacts(query);
+                if(!query){
+                    searchResult.textContent = 'Enter a topic or keyword to find facts.';
+                    return;
+                }
+                if(matches.length === 0){
+                    searchResult.textContent = `No facts found for "${query}". Try another topic like finance, science, or history.`;
+                    return;
+                }
+                const chosen = matches[Math.floor(Math.random() * matches.length)];
+                showFact({ text: chosen.text, idx: chosen.idx });
+                const topics = chosen.topics.join(', ');
+                searchResult.textContent = `Showing one of ${matches.length} facts for "${query}". Topic tags: ${topics}.`;
+            }
+
+            if(searchButton){ searchButton.addEventListener('click', ()=> showSearchResult(searchInput.value)); }
+            if(searchInput){ searchInput.addEventListener('keydown', e=>{ if(e.key === 'Enter'){ showSearchResult(searchInput.value); } }); }
+            topicButtons.forEach(btn => btn.addEventListener('click', ()=> showSearchResult(btn.dataset.topic)));
+
             // Daily fact (deterministic by date)
             function dailyIndex(){
                 const d = new Date().toISOString().slice(0,10); // YYYY-MM-DD
                 let s = 0; for(let i=0;i<d.length;i++) s += d.charCodeAt(i);
                 return s % facts.length;
             }
-            const dIdx = dailyIndex(); dailyEl.textContent = facts[dIdx];
+            const dIdx = dailyIndex(); dailyEl.textContent = facts[dIdx].text;
 
             // Favorites
             function getFavs(){ try { return JSON.parse(localStorage.getItem('rf_favs')||'[]'); } catch(e){ return []; } }
             function saveFavs(a){ localStorage.setItem('rf_favs', JSON.stringify(a)); }
 
             function toggleFav(idx){ const a=getFavs(); const i=a.indexOf(idx); if(i>-1){ a.splice(i,1); } else { a.push(idx); } saveFavs(a); }
-            function renderFavs(){ const list=document.getElementById('favsList'); const a=getFavs(); if(!a.length){ list.innerHTML='<p class="small">No favorites yet.</p>'; return } list.innerHTML=''; a.forEach(i=>{ const d=document.createElement('div'); d.style.padding='8px 0'; d.textContent = facts[i]; list.appendChild(d); }); }
+            function renderFavs(){ const list=document.getElementById('favsList'); const a=getFavs(); if(!a.length){ list.innerHTML='<p class="small">No favorites yet.</p>'; return } list.innerHTML=''; a.forEach(i=>{ const d=document.createElement('div'); d.style.padding='8px 0'; d.textContent = facts[i].text; list.appendChild(d); }); }
 
             document.getElementById('viewFavs').addEventListener('click', ()=>{ renderFavs(); const m=document.getElementById('favsModal'); m.style.display='flex'; });
             document.getElementById('closeFavs').addEventListener('click', ()=>{ document.getElementById('favsModal').style.display='none'; });
@@ -208,7 +265,7 @@
             document.getElementById('closeGame').addEventListener('click', ()=>gameModal.style.display='none');
             document.getElementById('restartGame').addEventListener('click', ()=>{ try{ startGame(); }catch(e){ console.error(e); alert('Restart failed: '+(e&&e.message)); } });
 
-              // show an initial random fact
+              // show an initial random fact immediately
               try{ showFact(randomFact()); }catch(e){ console.error('Initial fact failed', e); }
 
                     }catch(err){
